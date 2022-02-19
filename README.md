@@ -4,7 +4,7 @@ This is a python library to extract information from Wikipedia pages.
 
 ## Contents
 
-- `tables.py` includes function to extract information from a wikipedia table as a pandas dataframe.
+- `tables.py` module includes function to extract information from a wikipedia table as a pandas dataframe.
 
 ## Installation
 
