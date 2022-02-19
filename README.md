@@ -1,4 +1,4 @@
-# Extract Information From Wikipedia Pages 
+# toolwiki 
 
 This is a python library to extract information from Wikipedia pages. 
 
