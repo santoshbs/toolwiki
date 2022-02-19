@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 import copy
 import unicodedata
 
-def get_dataframes(url = '', by_class= 'wikitable', table_indices= [], raw=False):
+def get_dataframes(url = '', by_class= 'wikitable', table_indices= [], raw=False, header=True):
     """
     Extract information from tables on a Wikipedia page.
     Handles table cells with non-conflicting rowspan and colspan attributes.
@@ -15,6 +15,7 @@ def get_dataframes(url = '', by_class= 'wikitable', table_indices= [], raw=False
     :param by_class: class name of table to fetch; if None, fetches all tables.
     :param table_indices: list of indices of tables to process (e.g., [0, 2, 5]); defaults to all tables.
     :param raw: get raw inner html (useful for downstream processing); or (default) get raw text from each cell.
+    :param header: assume that first row is a header (default); create a generic header column (['HEADER_1', 'HEADER_2'...]).
     :return: list of dataframes extracted from tables in wikipedia page.
     """
 
@@ -43,13 +44,12 @@ def get_dataframes(url = '', by_class= 'wikitable', table_indices= [], raw=False
         tables= [e for i, e in enumerate(tables) if i in table_indices]
     assert len(tables) > 0, "No tables matching the provided table indices found on the page."
 
-    ##process one table at a time
+    ##0. process one table at a time
     list_pds= []
     for table in tables:
         trs = table.findAll('tr')
         if trs is not None and len(trs) > 0:
-            ##1. assumes top row is header
-            ###find what max columns to assign by scanning the entire table
+            ##1. find what max columns to assign by scanning the entire table
             max_col = 0
             for tr in trs:
                 ncol = 0
@@ -59,22 +59,26 @@ def get_dataframes(url = '', by_class= 'wikitable', table_indices= [], raw=False
                     ncol = ncol + cspan
                 max_col = max(max_col, ncol)
 
-            ##assign header as column names
-            header= []
-            children = trs[0].findChildren(recursive=False)
-            for i in range(0, len(children)):
-                colname = unicodedata.normalize('NFKD', u' '.join(children[i].findAll(text=True)).strip())
-                if not colname:
-                    colname= 'HEADER_' + str(i+1)
-                header.append(colname)
-            while len(header) < max_col:
-                header.append('HEADER_' + str(len(header) + 1))
+            ##2. assign header as column names
+            header_list= []
+            if header:
+                children = trs[0].findChildren(recursive=False)
+                for i in range(0, len(children)):
+                    colname = unicodedata.normalize('NFKD', u' '.join(children[i].findAll(text=True)).strip())
+                    if not colname:
+                        colname= 'HEADER_' + str(i+1)
+                    header_list.append(colname)
+                while len(header_list) < max_col:
+                    header_list.append('HEADER_' + str(len(header_list) + 1))
+            else:
+                while len(header_list) < max_col:
+                    header_list.append('HEADER_' + str(len(header_list) + 1))
 
-            ##2. create dataframe to capture table values
-            df_table_values = pd.DataFrame(index=np.arange(len(trs)), columns=header)
+            ##3. create dataframe to capture table values
+            df_table_values = pd.DataFrame(index=np.arange(len(trs)), columns=header_list)
             df_table_values = df_table_values.replace({np.nan: None})
 
-            ##3. prepare tds that have both rowspan and colspan
+            ##4. prepare tds that have both rowspan and colspan
             for i in range(1, len(trs)):
                 children= trs[i].findChildren('td', recursive=False)
                 if not children:
@@ -89,7 +93,7 @@ def get_dataframes(url = '', by_class= 'wikitable', table_indices= [], raw=False
                             td_copy = copy.copy(children[j])
                             children[j].insert_after(td_copy)
 
-            ##4. assign cell values bases on table spans
+            ##5. assign cell values bases on table spans
             for i in range(1, len(trs)):
                 val_row = i
                 children= trs[i].findChildren('td', recursive=False)
@@ -128,7 +132,7 @@ def get_dataframes(url = '', by_class= 'wikitable', table_indices= [], raw=False
                             df_table_values.iloc[r, c] = val
 
 
-            ##4. drop first row and add to list
+            ##6. drop first row and add to list
             df_table_values= df_table_values.iloc[1:, :]
             df_table_values.reset_index(inplace=True, drop= True)
             list_pds.append(df_table_values)
