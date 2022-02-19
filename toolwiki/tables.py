@@ -79,7 +79,8 @@ def get_dataframes(url = '', by_class= 'wikitable', table_indices= [], raw=False
             df_table_values = df_table_values.replace({np.nan: None})
 
             ##4. prepare tds that have both rowspan and colspan
-            for i in range(1, len(trs)):
+            rstart = 1 if header else 0
+            for i in range(rstart, len(trs)):
                 children= trs[i].findChildren('td', recursive=False)
                 if not children:
                     children= trs[i].findChildren('th', recursive=False)
@@ -94,7 +95,7 @@ def get_dataframes(url = '', by_class= 'wikitable', table_indices= [], raw=False
                             children[j].insert_after(td_copy)
 
             ##5. assign cell values bases on table spans
-            for i in range(1, len(trs)):
+            for i in range(rstart, len(trs)):
                 val_row = i
                 children= trs[i].findChildren('td', recursive=False)
                 if not children:
@@ -133,8 +134,9 @@ def get_dataframes(url = '', by_class= 'wikitable', table_indices= [], raw=False
 
 
             ##6. drop first row and add to list
-            df_table_values= df_table_values.iloc[1:, :]
-            df_table_values.reset_index(inplace=True, drop= True)
+            if header:
+                df_table_values= df_table_values.iloc[1:, :]
+                df_table_values.reset_index(inplace=True, drop= True)
             list_pds.append(df_table_values)
 
     return list_pds
