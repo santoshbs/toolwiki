@@ -8,11 +8,11 @@ This is a python library to extract information from Wikipedia pages.
 
 ## Installation
 
-You can install the Real Python Feed Reader from [PyPI](https://pypi.org/project/toolwiki/):
+You can install `toolwiki` package from [PyPI](https://pypi.org/project/toolwiki/):
 
     python -m pip install toolwiki
 
-The `toolwiki` is supported on Python 3.7 and above.
+`toolwiki` is supported on Python 3.7 and above.
 
 ## How to use
 
