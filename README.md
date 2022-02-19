@@ -12,7 +12,7 @@ You can install the Real Python Feed Reader from [PyPI](https://pypi.org/project
 
     python -m pip install toolwiki
 
-The reader is supported on Python 3.7 and above.
+The `toolwiki` is supported on Python 3.7 and above.
 
 ## How to use
 
