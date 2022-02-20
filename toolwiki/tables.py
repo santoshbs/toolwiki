@@ -84,10 +84,7 @@ def get_dataframes(url = '', by_class= 'wikitable', table_indices= [], raw=False
                 ##4. prepare tds that have both rowspan and colspan
                 rstart = 1 if header else 0
                 for i in range(rstart, len(trs)):
-                    children= trs[i].findChildren('td', recursive=False)
-                    if not children:
-                        children= trs[i].findChildren('th', recursive=False)
-
+                    children = trs[i].findAll(recursive=False) #trs[i].findChildren('td', recursive=False)
                     for j in range(0, len(children)):
                         cspan = int(children[j].get('colspan')) if children[j].get('colspan') else 1
                         rspan = int(children[j].get('rowspan')) if children[j].get('rowspan') else 1
@@ -100,9 +97,7 @@ def get_dataframes(url = '', by_class= 'wikitable', table_indices= [], raw=False
                 ##5. assign cell values bases on table spans
                 for i in range(rstart, len(trs)):
                     val_row = i
-                    children= trs[i].findChildren('td', recursive=False)
-                    if not children:
-                        children= trs[i].findChildren('th', recursive=False)
+                    children = trs[i].findAll(recursive=False) #trs[i].findChildren('td', recursive=False)
                     for j in range(0, len(children)):
                         ##what value to assign to cell(s)
                         if raw:
@@ -148,3 +143,4 @@ def get_dataframes(url = '', by_class= 'wikitable', table_indices= [], raw=False
             assert not bErrorTable, "Error processing table on the page."
 
     return list_pds
+
