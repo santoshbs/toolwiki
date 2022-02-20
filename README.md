@@ -5,6 +5,7 @@ This is a python library to extract information from Wikipedia pages.
 ## Contents
 
 - `tables.py` module includes function to extract information from a wikipedia table as a pandas dataframe.
+- `pages.py` module includes function to extract inferred gender based on the ratio of male and female pronouns on a wikipedia page.
 
 ## Installation
 
@@ -34,3 +35,7 @@ You can use this package in your own Python code by importing from the `toolwiki
     602  001                        UFC 1: The Beginning  ...      7,800  [559]
     [602 rows x 7 columns]]
     
+
+    >>> from toolwiki import page
+    >>> print(page.get_gender('https://en.wikipedia.org/wiki/Karolina_Kowalkiewicz', gender_threshold=0.8)
+    ('female', '1.0')

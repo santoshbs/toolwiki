@@ -9,7 +9,7 @@ README = (HERE / "README.md").read_text() ## The text of the README file
 
 setup(
     name='toolwiki',
-    version='0.1.13',
+    version='0.1.14',
     author='Santosh Srinivas',
     author_email='santosh.b.srinivas@outlook.com',
     description='A python library to extract information from Wikipedia pages.',
@@ -18,7 +18,7 @@ setup(
     url='https://github.com/santoshbs/toolwiki',
     license='MIT',
     packages=find_packages(),
-    install_requires=['numpy', 'pandas', 'beautifulsoup4', 'lxml'],
+    install_requires=['numpy', 'pandas', 'beautifulsoup4', 'lxml', 'spacy'],
     keywords=['python', 'html table rowspan colspan', 'scrape parse extract', 'dataframe'],
     classifiers=[
         'Programming Language :: Python :: 3',
