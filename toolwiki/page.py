@@ -41,15 +41,18 @@ def get_gender(url = '', gender_threshold = 0.8):
             count_female = count_female + 1
 
     ##calculate threshold achieved
+    threshold_m = 0
+    threshold_f = 0
     total = count_male + count_female
-    threshold_m = count_male/total
-    threshold_f =  1 - threshold_m
+    if total > 0:
+        threshold_m = count_male/total
+        threshold_f =  1 - threshold_m
 
-    ##assign gender, if above threshold
-    if threshold_m >= gender_threshold:
-        return ('male', threshold_m)
-    if threshold_f >= gender_threshold:
-        return ('female', threshold_f)
+        ##assign gender, if above threshold
+        if threshold_m >= gender_threshold:
+            return ('male', threshold_m)
+        if threshold_f >= gender_threshold:
+            return ('female', threshold_f)
 
     return ('unknown', max(threshold_m, threshold_f))
 
