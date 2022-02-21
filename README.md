@@ -5,7 +5,9 @@ This is a python library to extract information from Wikipedia pages.
 ## Contents
 
 - `tables.py` module includes function to extract information from a wikipedia table as a pandas dataframe.
-- `pages.py` module includes function to extract inferred gender based on the ratio of male and female pronouns on a wikipedia page.
+- `pages.py` module includes:
+  - function to extract inferred gender based on the ratio of male and female pronouns on a wikipedia page.
+  - function to get all category members.
 
 ## Installation
 
@@ -21,6 +23,7 @@ You can use this package in your own Python code by importing from the `toolwiki
 
     >>> from toolwiki import tables
     >>> dfs= tables.get_dataframes(url='https://en.wikipedia.org/wiki/List_of_UFC_events', by_class='wikitable', table_indices= [], raw=False)
+    >>> dfs
     [                                         Event  ...  Ref.
     1                                      UFC 276  ...   [9]
     2                          UFC Fight Night 211  ...  [10]
@@ -37,5 +40,22 @@ You can use this package in your own Python code by importing from the `toolwiki
     
 
     >>> from toolwiki import page
-    >>> print(page.get_gender('https://en.wikipedia.org/wiki/Karolina_Kowalkiewicz', gender_threshold=0.8)
+    >>> page.get_gender('https://en.wikipedia.org/wiki/Karolina_Kowalkiewicz', gender_threshold=0.8)
     ('female', '1.0')
+
+    >>> from toolwiki import page
+    >>> page.get_category_members('https://en.wikipedia.org/wiki/Category:Leadership', type=['pages', 'subcategories'])
+               category           type                                   title                                           url
+    0   Category:Leadership          pages                              Leadership                              /wiki/Leadership
+    1   Category:Leadership          pages                                3C-model                                /wiki/3C-model
+    2   Category:Leadership          pages  African Nutrition Leadership Programme  /wiki/African_Nutrition_Leadership_Programme
+    3   Category:Leadership          pages                      Agentic leadership                      /wiki/Agentic_leadership
+    4   Category:Leadership          pages                        Agile leadership                        /wiki/Agile_leadership
+    ..                  ...            ...                                     ...                                           ...
+    78  Category:Leadership  subcategories                     Leadership scholars            /wiki/Category:Leadership_scholars
+    79  Category:Leadership  subcategories                      Leadership studies             /wiki/Category:Leadership_studies
+    80  Category:Leadership  subcategories                              Management                     /wiki/Category:Management
+    81  Category:Leadership  subcategories                  Positions of authority         /wiki/Category:Positions_of_authority
+    82  Category:Leadership  subcategories                     Leadership training            /wiki/Category:Leadership_training
+    
+    [83 rows x 4 columns]
