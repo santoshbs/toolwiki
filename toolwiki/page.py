@@ -62,6 +62,8 @@ def get_category_members(url='', type=['pages', 'subcategories']):
     :return: (dataframe) category members.
     """
 
+    url_prefix = 'https://en.wikipedia.org'
+
     ##check params
     valid_type = ['pages', 'subcategories']
     for e in type:
@@ -78,45 +80,68 @@ def get_category_members(url='', type=['pages', 'subcategories']):
     assert page_exists, "Page does not exist."
     soup = BeautifulSoup(page, "html.parser")
 
-    total = 0
+    bFirstPage = True
+    while True:
+        total = 0
 
-    ##get pages
-    if 'pages' in type:
-        cat_pages = soup.find(id='mw-pages').find(class_='mw-content-ltr')
-        pages = cat_pages.findChildren('a', recursive=True)
-        total = total + len(pages)
+        ##get pages
+        if 'pages' in type:
+            try:
+                cat_pages = soup.find(id='mw-pages').find(class_='mw-content-ltr')
+                pages = cat_pages.findChildren('a', recursive=True)
+                total = total + len(pages)
+            except:
+                pass
 
-    ##get subcategories
-    if 'subcategories' in type:
-        cat_subcats = soup.find(id='mw-subcategories').find(class_='mw-content-ltr')
-        subcats = cat_subcats.findChildren('a', recursive=True)
-        total = total + len(subcats)
+        ##get subcategories
+        if 'subcategories' in type:
+            try:
+                cat_subcats = soup.find(id='mw-subcategories').find(class_='mw-content-ltr')
+                subcats = cat_subcats.findChildren('a', recursive=True)
+                total = total + len(subcats)
+            except:
+                pass
 
-    ##create dataframe to store members
-    header_list = ['category', 'type', 'title', 'url']
-    df_table_all = pd.DataFrame(index=np.arange(total), columns=header_list)
-    df_table_all = df_table_all.replace({np.nan: None})
+        ##create dataframe to store members
+        header_list = ['category', 'type', 'title', 'url']
+        df_table_all = pd.DataFrame(index=np.arange(total), columns=header_list)
+        df_table_all = df_table_all.replace({np.nan: None})
 
-    ##assign category name
-    title = unicodedata.normalize('NFKD', u' '.join(soup.find('title').findAll(text=True)))
-    title = title.replace(' - Wikipedia', '')
-    df_table_all['category'] = title
+        ##assign category name
+        title = unicodedata.normalize('NFKD', u' '.join(soup.find('title').findAll(text=True)))
+        title = title.replace(' - Wikipedia', '')
+        df_table_all['category'] = title
 
-    ##populate pages
-    rstart = 0
-    if 'pages' in type:
-        for i, tag in enumerate(pages):
-            df_table_all.loc[i, 'type'] = 'pages'
-            df_table_all.loc[i, 'title'] = unicodedata.normalize('NFKD', u' '.join(tag.findAll(text=True)))
-            df_table_all.loc[i, 'url'] = tag.get('href')
-        rstart = i + 1
+        ##populate pages
+        rstart = 0
+        if 'pages' in type:
+            for i, tag in enumerate(pages):
+                df_table_all.loc[i, 'type'] = 'pages'
+                df_table_all.loc[i, 'title'] = unicodedata.normalize('NFKD', u' '.join(tag.findAll(text=True)))
+                df_table_all.loc[i, 'url'] = tag.get('href')
+            rstart = i + 1
 
-    ##populate subcategories
-    if 'subcategories' in type:
-        for i, tag in enumerate(subcats):
-            df_table_all.loc[rstart + i, 'type'] = 'subcategories'
-            df_table_all.loc[rstart + i, 'title'] = unicodedata.normalize('NFKD', u' '.join(tag.findAll(text=True)))
-            df_table_all.loc[rstart + i, 'url'] = tag.get('href')
+        ##populate subcategories
+        if 'subcategories' in type:
+            for i, tag in enumerate(subcats):
+                df_table_all.loc[rstart + i, 'type'] = 'subcategories'
+                df_table_all.loc[rstart + i, 'title'] = unicodedata.normalize('NFKD', u' '.join(tag.findAll(text=True)))
+                df_table_all.loc[rstart + i, 'url'] = tag.get('href')
 
-    return df_table_all
+        if bFirstPage:
+            bFirstPage = False
+            df_out = df_table_all
+        else:
+            df_out = pd.concat([df_out, df_table_all], ignore_index=True)
+
+        ##check if nextpage exists
+        nextPage = soup.find(lambda tag:tag.name == 'a' and 'next page' in tag.text)
+        if nextPage:
+            url = url_prefix + nextPage.get('href')
+            page = urllib.request.urlopen(url)
+            soup = BeautifulSoup(page, "html.parser")
+        else:
+            break
+
+    return df_out
 
