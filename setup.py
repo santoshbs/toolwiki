@@ -9,7 +9,7 @@ README = (HERE / "README.md").read_text() ## The text of the README file
 
 setup(
     name='toolwiki',
-    version='0.1.14',
+    version='0.1.15',
     author='Santosh Srinivas',
     author_email='santosh.b.srinivas@outlook.com',
     description='A python library to extract information from Wikipedia pages.',

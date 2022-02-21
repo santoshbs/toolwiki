@@ -1,3 +1,5 @@
+import numpy as np
+import pandas as pd
 import spacy
 from bs4 import BeautifulSoup
 import urllib.request
@@ -52,4 +54,69 @@ def get_gender(url = '', gender_threshold = 0.8):
     return ('unknown', max(threshold_m, threshold_f))
 
 
+def get_category_members(url='', type=['pages', 'subcategories']):
+    """
+    Extract pages and subcategories of a given Wikipedia category.
+    :param url: (str) wikipedia page url (e.g., https://en.wikipedia.org/wiki/Category:Governance).
+    :param type: (list) if 'pages' in list, get pages; if 'subcategories' in list, get subcategories.
+    :return: (dataframe) category members.
+    """
+
+    ##check params
+    valid_type = ['pages', 'subcategories']
+    for e in type:
+        assert e in valid_type, "Invalid type supplied as parameter. Valid values include = " + ', '.join(valid_type)
+
+    ##read webpage
+    assert url != '', "No URL provided."
+    try:
+        page_exists= False
+        page= urllib.request.urlopen(url)
+        page_exists= True
+    except:
+        pass
+    assert page_exists, "Page does not exist."
+    soup = BeautifulSoup(page, "html.parser")
+
+    total = 0
+
+    ##get pages
+    if 'pages' in type:
+        cat_pages = soup.find(id='mw-pages').find(class_='mw-content-ltr')
+        pages = cat_pages.findChildren('a', recursive=True)
+        total = total + len(pages)
+
+    ##get subcategories
+    if 'subcategories' in type:
+        cat_subcats = soup.find(id='mw-subcategories').find(class_='mw-content-ltr')
+        subcats = cat_subcats.findChildren('a', recursive=True)
+        total = total + len(subcats)
+
+    ##create dataframe to store members
+    header_list = ['category', 'type', 'title', 'url']
+    df_table_all = pd.DataFrame(index=np.arange(total), columns=header_list)
+    df_table_all = df_table_all.replace({np.nan: None})
+
+    ##assign category name
+    title = unicodedata.normalize('NFKD', u' '.join(soup.find('title').findAll(text=True)))
+    title = title.replace(' - Wikipedia', '')
+    df_table_all['category'] = title
+
+    ##populate pages
+    rstart = 0
+    if 'pages' in type:
+        for i, tag in enumerate(pages):
+            df_table_all.loc[i, 'type'] = 'pages'
+            df_table_all.loc[i, 'title'] = unicodedata.normalize('NFKD', u' '.join(tag.findAll(text=True)))
+            df_table_all.loc[i, 'url'] = tag.get('href')
+        rstart = i + 1
+
+    ##populate subcategories
+    if 'subcategories' in type:
+        for i, tag in enumerate(subcats):
+            df_table_all.loc[rstart + i, 'type'] = 'subcategories'
+            df_table_all.loc[rstart + i, 'title'] = unicodedata.normalize('NFKD', u' '.join(tag.findAll(text=True)))
+            df_table_all.loc[rstart + i, 'url'] = tag.get('href')
+
+    return df_table_all
 
