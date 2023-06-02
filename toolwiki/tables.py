@@ -86,8 +86,8 @@ def get_dataframes(url = '', by_class= 'wikitable', table_indices= [], raw=False
                 for i in range(rstart, len(trs)):
                     children = trs[i].findAll(recursive=False) #trs[i].findChildren('td', recursive=False)
                     for j in range(0, len(children)):
-                        cspan = int(children[j].get('colspan')) if children[j].get('colspan') else 1
-                        rspan = int(children[j].get('rowspan')) if children[j].get('rowspan') else 1
+                        cspan = int(''.join((ch if ch in '0123456789' else '') for ch in children[j].get('colspan'))) if children[j].get('colspan') else 1
+                        rspan = int(''.join((ch if ch in '0123456789' else '') for ch in children[j].get('rowspan'))) if children[j].get('rowspan') else 1
                         if cspan > 1 and rspan > 1:
                             del children[j]['colspan']
                             for c in range(1, cspan):
@@ -112,8 +112,8 @@ def get_dataframes(url = '', by_class= 'wikitable', table_indices= [], raw=False
                             val_col= val_col + 1
                         df_table_values.iloc[val_row, val_col]= val
 
-                        cspan = int(children[j].get('colspan')) if children[j].get('colspan') else 1
-                        rspan = int(children[j].get('rowspan')) if children[j].get('rowspan') else 1
+                        cspan = int(''.join((ch if ch in '0123456789' else '') for ch in children[j].get('colspan'))) if children[j].get('colspan') else 1
+                        rspan = int(''.join((ch if ch in '0123456789' else '') for ch in children[j].get('rowspan'))) if children[j].get('rowspan') else 1
 
                         ##handle when colspan alone is present
                         if cspan > 1 and rspan == 1:
@@ -143,4 +143,5 @@ def get_dataframes(url = '', by_class= 'wikitable', table_indices= [], raw=False
             assert not bErrorTable, "Error processing table on the page."
 
     return list_pds
+
 
