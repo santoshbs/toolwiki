@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 import copy
 import unicodedata
 
-def get_dataframes(url = '', by_class= 'wikitable', after_id = None, table_indices= [], raw=False, header=True, errors_ignore=True):
+def get_dataframes(url = '', by_class= 'wikitable', table_indices= [], raw=False, header=True, errors_ignore=True):
     """
     Extract information from tables on a Wikipedia page.
     Handles table cells with non-conflicting rowspan and colspan attributes.
@@ -13,7 +13,6 @@ def get_dataframes(url = '', by_class= 'wikitable', after_id = None, table_indic
 
     :param url: wikipedia page url (e.g., https://en.wikipedia.org/wiki/List_of_UFC_events).
     :param by_class: class name of table to fetch; if None, fetches all tables.
-    :param after_id: find only those dataframes after this specific element id.
     :param table_indices: list of indices of tables to process (e.g., [0, 2, 5]); defaults to all tables.
     :param raw: get raw inner html (useful for downstream processing); or (default) get raw text from each cell.
     :param header: assume that first row is a header (default); create a generic header column (['HEADER_1', 'HEADER_2'...]).
@@ -34,19 +33,9 @@ def get_dataframes(url = '', by_class= 'wikitable', after_id = None, table_indic
 
     ##find tables
     if by_class is None:
-        if after_id is None:
-            tables= soup.find_all('table')
-        else:
-            soup_after = soup.find(id=after_id)
-            assert soup_after, "after_id element does not exist."
-            tables = soup_after.find_all_next('table')
+        tables= soup.find_all('table')
     else:
-        if after_id is None:
-            tables= soup.find_all('table', class_=by_class)
-        else:
-            soup_after = soup.find(id=after_id)
-            assert soup_after, "after_id element does not exist."
-            tables = soup_after.find_all_next('table', class_=by_class)
+        tables= soup.find_all('table', class_=by_class)
     assert len(tables) > 0, "No tables found on the page."
     if len(table_indices) > 0:
         ##table index check
